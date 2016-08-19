@@ -9,7 +9,10 @@ DiscrByOSLSType  OS	#### OS or LS
 DiscrByCosDphi	 true
 CosDphiCut 	 -1.00   -0.95
 
-DiscrByCosDphi_DeltaPtAndMet   true
+DiscrByCosDphi_DeltaPt1AndMet true
+CosDphi_DeltaPt1MetCut  0.9  1
+
+DiscrByCosDphi_DeltaPtAndMet   false
 CosDphi_DeltaPtMetCut  -1.0  -0.9
 MassBySVFit    false
 Name    100     0     5000
