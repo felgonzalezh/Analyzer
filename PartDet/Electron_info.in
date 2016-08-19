@@ -24,15 +24,15 @@ MotherID 23.
 //---RECO CUTS---///
 
 EtaCut 2.1
-PtCut 20.0 9999.9
+PtCut 10.0 9999.9
 
-DoDiscrByIsolation 0
-IsoSumPtCutValue 0.0 0.4
+DoDiscrByIsolation 1
+IsoSumPtCutValue 0.0 0.2
 
 DoDiscrByVetoID 0
 DoDiscrByLooseID 0
 DoDiscrByMediumID 0
-DoDiscrByTightID 0
+DoDiscrByTightID 1
 DoDiscrByHEEPID 0
 
 ///---MET TOPOLOGY CUTS---///
@@ -40,7 +40,7 @@ DoDiscrByHEEPID 0
 DiscrIfIsZdecay 0
 
 DiscrByMetDphi 0
-MetDphiCut 1.70 3.15
+MetDphiCut 1.30 3.15
 
 DiscrByMetMt 0
 MetMtCut 0. 40.
@@ -54,13 +54,13 @@ MetMtCut 0. 40.
 EtaCut 2.1
 PtCut 20.0 9999.9
 
-DoDiscrByIsolation 0
+DoDiscrByIsolation 1
 IsoSumPtCutValue 0.0 0.2
 
 DoDiscrByVetoID 0
 DoDiscrByLooseID 0
 DoDiscrByMediumID 0
-DoDiscrByTightID 0
+DoDiscrByTightID 1
 DoDiscrByHEEPID 0
 
 ///---MET TOPOLOGY CUTS---///
