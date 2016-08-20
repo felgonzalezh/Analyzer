@@ -231,6 +231,7 @@ DiTauOSLS                        20   -10    10
 DiTauCosDphi                    220    -1.1   1.1
 DiTau_Tau1CosDphiPtandMet       220    -1.1   1.1 
 DiTau_Tau2CosDphiPtandMet       220    -1.1   1.1 
+DiTau_RateCosphiPtandMet	 60    	-3     3
 DiTauCosDphi_DeltaPtAndMet      220    -1.1      1.1
 DiTau_Tau1MetDeltaPhi            72     0    +3.15
 DiTau_Tau2MetDeltaPhi            72     0    +3.15

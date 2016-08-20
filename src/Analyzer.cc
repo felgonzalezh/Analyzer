@@ -930,12 +930,10 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       	if( diMass < stats.pmap.at("MassCut").first || diMass > stats.pmap.at("MassCut").second) continue;
       }
 
-      //Felipe in order to add the cuts proposed bby Zaixing
+      //Felipe in order to add the cuts proposed by Zaixing
       if(stats.bmap.at("DiscrByCosDphiPtAndMet")){
-	//      if(stats.bmap.find("DeltaPt1AndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_Pt1AndMet")) {
       	double CosDPhi1 = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
       	double CosDPhi2 = cos(absnormPhi(part2.Phi() - theMETVector.Phi()));
-	//if( CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first || CosDPhi1 > stats.pmap.at("CosDphiPtAndMetCut").second || 
 	if(   CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first || CosDPhi1 > stats.pmap.at("CosDphiPtAndMetCut").second || CosDPhi2 < stats.pmap.at("CosDphi_DeltaPt1MetCut").first || CosDPhi2 > stats.pmap.at("CosDphiPtAndMetCut").second)  continue;
       }
 
@@ -1365,6 +1363,9 @@ void Analyzer::fill_Folder(string group, int max) {
       //Felipe
       histo.addVal(cos(absnormPhi(part1.Phi() - theMETVector.Phi())), group,max, "Part1CosDphiPtandMet", wgt);
       histo.addVal(cos(absnormPhi(part2.Phi() - theMETVector.Phi())), group,max, "Part2CosDphiPtandMet", wgt);
+      double rateCosDphiPtandMet = cos(absnormPhi(part1.Phi() - theMETVector.Phi()))/(cos(absnormPhi(part2.Phi() - theMETVector.Phi())));
+      histo.addVal(rateCosDphiPtandMet, group,max, "RateCosDphiPtandMet", wgt);
+
 
       histo.addVal(absnormPhi(part1.Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
       histo.addVal(absnormPhi(part1.Phi() - theMETVector.Phi()), cos(absnormPhi(part2.Phi() - part1.Phi())), group,max, "Part1MetDeltaPhiVsCosDphi", wgt);
