@@ -6,10 +6,10 @@ NGenZ		0  -1
 NGenW		0  -1
 NGenHiggs	0  -1
 
-***NRecoVertex           1   -1
-***NRecoTriggers1	      1   -1           ///only 0 or 1
-***NRecoTriggers2	      1   -1           ///only 0 or 1
-NRecoMuon1	      0   -1
+***NRecoVertex		1   -1
+***NRecoTriggers1	1   -1           ///only 0 or 1
+***NRecoTriggers2	1   -1           ///only 0 or 1
+NRecoMuon1		0   -1
 NRecoMuon2	      0   -1
 NRecoElectron1	      0   -1
 NRecoElectron2	      0   -1
@@ -31,7 +31,7 @@ NRecoTau1MetTopology 	   0   -1
 NRecoTau2MetTopology 	   0   -1
 
 ***METCut		   1   -1
-***NRecoBJet	      	   1   -1
+***NRecoBJet	      	   0	0
 
 NDiMuonCombinations	   0   -1
 NDiElectronCombinations	   0   -1
@@ -51,7 +51,7 @@ NMuon1Electron2Combinations   0   -1
 NMuon2Electron1Combinations   0   -1
 NMuon2Electron2Combinations   0   -1
 
-NSusyCombinations       0   -1   ///only 0 or 1
+NSusyCombinations       1   -1   ///only 0 or 1
 
 
 

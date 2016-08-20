@@ -931,11 +931,12 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       }
 
       //Felipe in order to add the cuts proposed bby Zaixing
-      
-      if(stats.bmap.find("DeltaPt1AndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_Pt1AndMet")) {
-      	double DPhi1 = absnormPhi(atan2(part1.Py(), part1.Px()) - theMETVector.Phi());
-      	double DPhi2 = absnormPhi(atan2(part2.Py(), part2.Px()) - theMETVector.Phi());
-      	if( cos(DPhi1) > stats.pmap.at("CosDphi_DeltaPt1MetCut").first || cos(DPhi1) < stats.pmap.at("CosDphi_DeltaPt1MetCut").second || cos(DPhi2) > stats.pmap.at("CosDphi_DeltaPt1MetCut").first || cos(DPhi2) < stats.pmap.at("CosDphi_DeltaPt1MetCut").second ) continue;
+      if(stats.bmap.at("DiscrByCosDphiPtAndMet")){
+	//      if(stats.bmap.find("DeltaPt1AndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_Pt1AndMet")) {
+      	double CosDPhi1 = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
+      	double CosDPhi2 = cos(absnormPhi(part2.Phi() - theMETVector.Phi()));
+	//if( CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first || CosDPhi1 > stats.pmap.at("CosDphiPtAndMetCut").second || 
+	if(   CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first || CosDPhi1 > stats.pmap.at("CosDphiPtAndMetCut").second || CosDPhi2 < stats.pmap.at("CosDphi_DeltaPt1MetCut").first || CosDPhi2 > stats.pmap.at("CosDphiPtAndMetCut").second)  continue;
       }
 
       if (stats.bmap.at("DiscrByCDFzeta2D")) {

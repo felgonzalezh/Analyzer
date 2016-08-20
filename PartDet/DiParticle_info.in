@@ -9,14 +9,8 @@ DiscrByOSLSType  OS	#### OS or LS
 DiscrByCosDphi	 true
 CosDphiCut 	 -1.00   -0.95
 
-DiscrByCosDphi_DeltaPt1AndMet true
-CosDphi_DeltaPt1MetCut  0.9  1
-
-DiscrByCosDphi_DeltaPtAndMet   false
-CosDphi_DeltaPtMetCut  -1.0  -0.9
-MassBySVFit    false
-Name    100     0     5000
-
+DiscrByCosDphiPtAndMet true
+CosDphiPtAndMetCut  0.9  1
 
 DiscrByMassReco  false
 HowCalculateMassReco VectorSumOfVisProductsAndMet               ###VectorSumOfVisProductsAndMet   or    CollinearApprox  
@@ -25,12 +19,18 @@ MassCut          100.0   10000.0
 DiscrByCDFzeta2D          true
 PZetaCutCoefficient       1.0
 PZetaVisCutCoefficient    -3.1
-CDFzeta2DCutValue         -50.0    1000
+CDFzeta2DCutValue         -50.0    9999.0
 
 DiscrByDeltaPtDivSumPt     false
 DeltaPtDivSumPtCutValue    0.1  1.0
 DiscrByDeltaPt 		   false
 DeltaPtCutValue 	   30.0   9999.0
+
+DiscrByCosDphi_DeltaPtAndMet   false
+CosDphi_DeltaPtMetCut  -1.0  -0.9
+MassBySVFit    false
+Name    100     0     5000
+
 
 ######################################
                DiMuon
