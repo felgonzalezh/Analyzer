@@ -19,7 +19,7 @@ MassCut          100.0   10000.0
 DiscrByCDFzeta2D          true
 PZetaCutCoefficient       1.0
 PZetaVisCutCoefficient    -3.1
-CDFzeta2DCutValue         -50.0    1000
+CDFzeta2DCutValue         -50.0    9999.0
 
 DiscrByDeltaPtDivSumPt     false
 DeltaPtDivSumPtCutValue    0.1  1.0
