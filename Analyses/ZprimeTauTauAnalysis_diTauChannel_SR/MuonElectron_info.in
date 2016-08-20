@@ -1,5 +1,5 @@
 ################################
-         Muon1Tau1
+         Muon1Electron1
 #############################
 
 DiscrByDeltaR  1
@@ -27,7 +27,7 @@ DiscrByDeltaPt 		   0
 DeltaPtCutValue 	   30.0   1000.0
 
 ###############################
-           Muon1Tau2
+           Muon1Electron2
 ##############################
 
 DiscrByDeltaR  1
@@ -55,7 +55,7 @@ DiscrByDeltaPt 		   0
 DeltaPtCutValue 	   30.0   1000.0
 
 ####################################
-              Muon2Tau1
+              Muon2Electron1
 ###################################
 
 DiscrByDeltaR  1
@@ -83,7 +83,7 @@ DiscrByDeltaPt 		   0
 DeltaPtCutValue 	   30.0   1000.0
 
 #########################
-        Muon2Tau2
+        Muon2Electron2
 ########################
 
 DiscrByDeltaR  1
