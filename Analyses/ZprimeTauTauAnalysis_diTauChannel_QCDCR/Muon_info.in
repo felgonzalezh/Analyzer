@@ -1,43 +1,68 @@
-Smear
+/////////////////////////////////
+            Smear
+/////////////////////////////////
 
-MatchToGen                        0
-UseMotherID                       0
-MotherID                        23.
-GenMatchingDeltaR               0.2
-SmearTheParticle                  0
-PtScaleOffset                   1.0
-PtSigmaOffset                   1.0
-EtaScaleOffset                  1.0
-EtaSigmaOffset                  1.0
-PhiScaleOffset                  1.0
-PhiSigmaOffset                  1.0
-EnergyScaleOffset               1.0
-EnergySigmaOffset               1.0
+SmearTheParticle 0
+PtScaleOffset 1.
+PtSigmaOffset 1.
+EtaScaleOffset 1.
+EtaSigmaOffset 1.
+PhiScaleOffset 1.
+PhiSigmaOffset 1.
+EnergyScaleOffset 1.
+EnergySigmaOffset 1.
 
-Muon1
+MatchToGen 0
+GenMatchingDeltaR 0.3
+UseMotherID 0
+MotherID 23.0
 
-EtaCut                          2.1    
-PtCut                          30.0    9999.9
-DoDiscrByTightID                  1    
-DoDiscrBySoftID                   0    
-DoDiscrByIsolation                1    
-IsoSumPtCutValue                0.0    0.2
-DiscrIfIsZdecay                   0    
-DiscrByMetDphi                    0    
-MetDphiCut                     1.30    3.15
-DiscrByMetMt                      0    
-MetMtCut                        0.0    40.0
+////////////////////////////////
+             Muon1
+///////////////////////////////
 
-Muon2
+//----RECO CUTS----//
 
-EtaCut                          2.1    
-PtCut                          30.0    9999.9
-DoDiscrByTightID                  1    
-DoDiscrBySoftID                   0    
-DoDiscrByIsolation                1    
-IsoSumPtCutValue                0.0    0.2
-DiscrIfIsZdecay                   0    
-DiscrByMetDphi                    0    
-MetDphiCut                     1.30    3.15
-DiscrByMetMt                      0    
-MetMtCut                        0.0    99999.9
+EtaCut 2.5
+PtCut 10.0 9999.9
+
+DoDiscrByTightID 1
+DoDiscrBySoftID 0
+
+DoDiscrByIsolation 1
+IsoSumPtCutValue 0.0 0.2
+
+//----MET TOPOLOGY CUTS----//
+
+DiscrIfIsZdecay 0
+
+DiscrByMetDphi 0
+MetDphiCut 1.3 3.15
+
+DiscrByMetMt 0
+MetMtCut 0. 40.
+
+////////////////////////////////
+             Muon2
+///////////////////////////////
+
+//----RECO CUTS----//
+
+EtaCut 2.1
+PtCut 20.0 9999.9
+
+DoDiscrByTightID 1
+DoDiscrBySoftID 0
+
+DoDiscrByIsolation 1
+IsoSumPtCutValue 0.0 0.2
+
+//----MET TOPOLOGY CUTS----//
+
+DiscrIfIsZdecay 0
+
+DiscrByMetDphi 0
+MetDphiCut 1.30 3.15
+
+DiscrByMetMt 0
+MetMtCut 10. 100.
