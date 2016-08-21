@@ -932,16 +932,16 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
       //Felipe in order to add the cuts proposed by Zaixing
       if(stats.bmap.at("DiscrByCosDphiPtAndMet")){
-      	double CosDPhi1 = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
-      	double CosDPhi2 = cos(absnormPhi(part2.Phi() - theMETVector.Phi()));
-	if(   CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first || CosDPhi1 > stats.pmap.at("CosDphiPtAndMetCut").second || CosDPhi2 < stats.pmap.at("CosDphi_DeltaPt1MetCut").first || CosDPhi2 > stats.pmap.at("CosDphiPtAndMetCut").second)  continue;
+     	double CosDPhi1 = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
+	double CosDPhi2 = cos(absnormPhi(part2.Phi() - theMETVector.Phi()));
+	if(( CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first && CosDPhi2 < stats.pmap.at("CosDphiPtAndMetCut").first ))	continue; 
       }
 
-      if (stats.bmap.at("DiscrByCDFzeta2D")) {
-      	double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2) 
-	  + stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(part1, part2);
+    if (stats.bmap.at("DiscrByCDFzeta2D")) {
+      double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2) 
+	+ stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(part1, part2);
       	if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
-      }
+    }
       
       
       //////////abs on the difference????
