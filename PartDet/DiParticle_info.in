@@ -9,14 +9,26 @@ DiscrByOSLSType  OS	#### OS or LS
 DiscrByCosDphi	 true
 CosDphiCut 	 -1.00   -0.95
 
-DiscrByCosDphiPtAndMet true
+DiscrByCosDphiPtAndMet false
 CosDphiPtAndMetCut  0.9  1
+
+DiscrByCosDphiMetAndR false
+DiscrByCosDphiMetAndRCut -1.00   -0.95
+
+DiscrByCosDphiPt_lower_AndMet false
+CosDphiPt_lower_AndMetCut  -1.00  -0.9
+
+DiscrByCosDphi_SumPtAndMet   false
+CosDphi_SumPtMetCut  -1.0  -0.9
+
+DiscrByCosDphi_DeltaPtAndMet   false
+CosDphi_DeltaPtMetCut  -1.0  -0.9
 
 DiscrByMassReco  false
 HowCalculateMassReco VectorSumOfVisProductsAndMet               ###VectorSumOfVisProductsAndMet   or    CollinearApprox  
-MassCut          100.0   10000.0
+MassCut          300.0   10000.0
 
-DiscrByCDFzeta2D          true
+DiscrByCDFzeta2D          false
 PZetaCutCoefficient       1.0
 PZetaVisCutCoefficient    -3.1
 CDFzeta2DCutValue         -50.0    9999.0
@@ -26,8 +38,6 @@ DeltaPtDivSumPtCutValue    0.1  1.0
 DiscrByDeltaPt 		   false
 DeltaPtCutValue 	   30.0   9999.0
 
-DiscrByCosDphi_DeltaPtAndMet   false
-CosDphi_DeltaPtMetCut  -1.0  -0.9
 MassBySVFit    false
 Name    100     0     5000
 

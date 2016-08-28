@@ -938,17 +938,40 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 	if(( CosDPhi1 < stats.pmap.at("CosDphiPtAndMetCut").first && CosDPhi2 < stats.pmap.at("CosDphiPtAndMetCut").first ))	continue; 
       }
 
-    if (stats.bmap.at("DiscrByCDFzeta2D")) {
-      double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2) 
-	+ stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(part1, part2);
-      	if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
-    }
+      if(stats.bmap.at("DiscrByCosDphiMetAndR")){
+	double rateCosDphiPtandMet = cos(absnormPhi(part1.Phi() - theMETVector.Phi()))/(cos(absnormPhi(part2.Phi() - theMETVector.Phi())));
+	if(( rateCosDphiPtandMet < stats.pmap.at("DiscrByCosDphiMetAndRCut").first || rateCosDphiPtandMet > stats.pmap.at("DiscrByCosDphiMetAndRCut").second ))	continue;
+      }
+
+      if(stats.bmap.at("DiscrByCosDphiPt_lower_AndMet")){
+	double part_pt1 = part1.Pt();
+	double part_pt2 = part2.Pt();
+	if(part_pt1 > part_pt2){
+     	double CosDPhi_low = cos(absnormPhi(part2.Phi() - theMETVector.Phi()));
+	if(( CosDPhi_low < stats.pmap.at("CosDphiPt_lower_AndMetCut").first || CosDPhi_low > stats.pmap.at("CosDphiPt_lower_AndMetCut").second ))	continue; 	
+	}else{
+	  double CosDPhi_low = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
+	  if(( CosDPhi_low < stats.pmap.at("CosDphiPt_lower_AndMetCut").first || CosDPhi_low > stats.pmap.at("CosDphiPt_lower_AndMetCut").second ))	continue; 	
+	}
+      }
       
+      
+      if (stats.bmap.at("DiscrByCDFzeta2D")) {
+	double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2) 
+	  + stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(part1, part2);
+      	if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
+      }
+      
+      if(stats.bmap.at("DiscrByCosDphi_SumPtAndMet")) {
+      	double DPhi = absnormPhi(atan2(part1.Py() + part2.Py(), part1.Px() + part2.Px()) - theMETVector.Phi());
+      	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMetCut").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMetCut").second) continue;
+      }
       
       //////////abs on the difference????
       ///////////////////
-      if(stats.bmap.find("DeltaPtAndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
-      	double DPhi = absnormPhi(atan2(part1.Py() + part2.Py(), part1.Px() + part2.Px()) - theMETVector.Phi());
+      //      if(stats.bmap.find("DeltaPtAndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
+	if(stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
+      	double DPhi = absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - theMETVector.Phi());
       	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMetCut").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMetCut").second) continue;
       }
       if (stats.bmap.at("DiscrByDeltaPtDivSumPt")) {
@@ -1364,15 +1387,29 @@ void Analyzer::fill_Folder(string group, int max) {
       //Felipe
       histo.addVal(cos(absnormPhi(part1.Phi() - theMETVector.Phi())), group,max, "Part1CosDphiPtandMet", wgt);
       histo.addVal(cos(absnormPhi(part2.Phi() - theMETVector.Phi())), group,max, "Part2CosDphiPtandMet", wgt);
+
       double rateCosDphiPtandMet = cos(absnormPhi(part1.Phi() - theMETVector.Phi()))/(cos(absnormPhi(part2.Phi() - theMETVector.Phi())));
       histo.addVal(rateCosDphiPtandMet, group,max, "RateCosDphiPtandMet", wgt);
 
+      double part_pt1,part_pt2;
+      part_pt1 = part1.Pt();
+      part_pt2 = part2.Pt();
+      if(part_pt1 > part_pt2){
+      histo.addVal(cos(absnormPhi(part2.Phi() - theMETVector.Phi())), group,max, "CosDphi_DeltaPt_lower_AndMet", wgt);
+      histo.addVal(cos(absnormPhi(part1.Phi() - theMETVector.Phi())), group,max, "Part1_High_CosDphiPtandMet", wgt);
+      }else{
+      histo.addVal(cos(absnormPhi(part1.Phi() - theMETVector.Phi())), group,max, "CosDphi_DeltaPt_lower_AndMet", wgt);
+      histo.addVal(cos(absnormPhi(part2.Phi() - theMETVector.Phi())), group,max, "Part2_High_CosDphiPtandMet", wgt);
+      }
 
       histo.addVal(absnormPhi(part1.Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
       histo.addVal(absnormPhi(part1.Phi() - theMETVector.Phi()), cos(absnormPhi(part2.Phi() - part1.Phi())), group,max, "Part1MetDeltaPhiVsCosDphi", wgt);
       histo.addVal(absnormPhi(part2.Phi() - theMETVector.Phi()), group,max, "Part2MetDeltaPhi", wgt);
+
+      histo.addVal(cos(absnormPhi(atan2(part1.Py() + part2.Py(), part1.Px() + part2.Px()) - theMETVector.Phi())), group,max, "CosDphi_SumPtAndMet", wgt);
       histo.addVal(cos(absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - theMETVector.Phi())), group,max, "CosDphi_DeltaPtAndMet", wgt);
 
+      
       double diMass = diParticleMass(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"));
       if(passDiParticleApprox(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"))) {
 	histo.addVal(diMass, group,max, "ReconstructableMass", wgt);

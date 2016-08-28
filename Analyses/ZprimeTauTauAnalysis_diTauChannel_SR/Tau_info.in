@@ -22,7 +22,7 @@ GenMatchingDeltaR 0.3
 //RECO CUTS///
 
 EtaCut 2.1
-PtCut 70.0 9999.9
+PtCut 50.0 9999.9
 
 DoDiscrByLeadTrack false
 LeadTrackThreshold 5.0
@@ -100,7 +100,7 @@ MetMtCut 0.0    40.0
 //----RECO CUTS----////
 
 EtaCut 2.1
-PtCut 70.0 9999.9
+PtCut 50.0 9999.9
 
 DoDiscrByLeadTrack false
 LeadTrackThreshold 5.0

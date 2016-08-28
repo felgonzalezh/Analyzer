@@ -51,7 +51,7 @@ NMuon1Electron2Combinations   0   -1
 NMuon2Electron1Combinations   0   -1
 NMuon2Electron2Combinations   0   -1
 
-NSusyCombinations       1   -1   ///only 0 or 1
+NSusyCombinations       0   -1   ///only 0 or 1
 
 
 

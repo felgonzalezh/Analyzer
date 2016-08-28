@@ -7,7 +7,7 @@ DataHistos PU2016data_6p2ifb.root
 MCHistos PU2016MC.root
 
 isData true
-ApplyGenWeight  false
+ApplyGenWeight  true
 
 ///------Triggers-----///
 
