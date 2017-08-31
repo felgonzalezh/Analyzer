@@ -7,18 +7,18 @@ DataHistos data_75bins_69200.root
 MCHistos MC_75bins.root
 DataPUHistName pileup
 MCPUHistName pileup
+UsePileUpWeight  true
 
 isData false
-ApplyGenWeight  true
-ApplyTauIDSF true
-ApplyZBoostSF false
+ApplyGenWeight  false
 
 ///------Triggers-----///
 
-#Trigger1FirstRequirement HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v
-#Trigger1SecondRequirement HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v
-#Trigger2FirstRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
-#Trigger2SecondRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
+Trigger1FirstRequirement HLT_IsoMu24_eta2p1_v
+Trigger1SecondRequirement HLT_IsoMu18_v
+
+Trigger2FirstRequirement HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v
+Trigger2SecondRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
 
 ///---Treat Muon as Neutrino---///
 
@@ -27,16 +27,15 @@ TreatMuonsAsTaus 0
 
 ///-----MET cuts------///
 
-DiscrByMet false
+DiscrByMet true
 MetCut 30.0 10000.0
 
 DiscrByMHT false
-MhtCut 50.0
+MhtCut 30.0
 DiscrByHT false
 HtCut 30.0
 
 
-ApplyJetLooseIDforMhtAndHt false
+ApplyJetLooseIDforMhtAndHt true
 JetPtForMhtAndHt 30.0
 JetEtaForMhtAndHt 5.0
-#ApplyJetLo

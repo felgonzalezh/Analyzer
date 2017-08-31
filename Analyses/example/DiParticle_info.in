@@ -5,16 +5,13 @@
 DiscrByDeltaR  true
 DeltaRCut      0.3
 
-DiscrByOSLSType  OS	#### OS or LS
+DiscrByOSLSType  None	#### OS or LS
 DiscrByCosDphi	 false
-CosDphiCut 	 -0.95   1.00
+CosDphiCut 	 -1.00   -0.80
 
 DiscrByMassReco  false
-HowCalculateMassReco  InvariantMass # VectorSumOfVisProductsAndMet       ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
-MassCut          0.0   100.0
-
-DiscrByCosDphiPtAndMet        false
-CosDphiPtAndMetCut            -1. -0.9 
+HowCalculateMassReco  VectorSumOfVisProductsAndMet       ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
+MassCut          100.0   10000.0
 
 DiscrByCDFzeta2D          false
 PZetaCutCoefficient       1.0
@@ -26,22 +23,21 @@ DeltaPtDivSumPtCutValue    0.4  1.0
 DiscrByDeltaPt 		   false
 DeltaPtCutValue 	   50.0   1000.0
 
-
 ######################################
                DiMuon
 #####################################
 
-DiscrByDeltaR  0
+DiscrByDeltaR  1
 DeltaRCut      0.3 
 
-DiscrByOSLSType  NONE
+DiscrByOSLSType  OS
 DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByCosDphi_DeltaPtAndMet   false
 CosDphi_DeltaPtMetCut  0.8  1.0
 
-DiscrByMassReco  false
+DiscrByMassReco  true
 HowCalculateMassReco VectorSumOfVisProductsAndMet     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          150.0   10000.0
 
@@ -55,14 +51,11 @@ DeltaPtDivSumPtCutValue    0.1  1.0
 DiscrByDeltaPt 		   true
 DeltaPtCutValue 	   30.0   9999.0
 
-DiscrByCosDphiPtAndMet        false
-CosDphiPtAndMetCut            -1. -0.9
-
 ########################################
                DiElectron
 #######################################
 
-DiscrByDeltaR  0
+DiscrByDeltaR  1
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No
@@ -86,14 +79,12 @@ DeltaPtDivSumPtCutValue    0.1  1.0
 DiscrByDeltaPt 		   0
 DeltaPtCutValue 	   30.0   1000.0
 
-DiscrByCosDphiPtAndMet        false
-CosDphiPtAndMetCut            -1. -0.9
 
 #########################################
                DiJet
 #####################################
 
-DiscrByDeltaR false
+DiscrByDeltaR true
 DeltaRCut 0.3
 
 DiscrByDeltaEta      false

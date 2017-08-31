@@ -2,7 +2,7 @@
          Muon1Tau1
 #############################
 
-DiscrByDeltaR  0
+DiscrByDeltaR  1
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No
@@ -30,7 +30,7 @@ DeltaPtCutValue 	   30.0   1000.0
            Muon1Tau2
 ##############################
 
-DiscrByDeltaR  0
+DiscrByDeltaR  1
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No
@@ -58,7 +58,7 @@ DeltaPtCutValue 	   30.0   1000.0
               Muon2Tau1
 ###################################
 
-DiscrByDeltaR  0
+DiscrByDeltaR  1
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No
@@ -86,7 +86,7 @@ DeltaPtCutValue 	   30.0   1000.0
         Muon2Tau2
 ########################
 
-DiscrByDeltaR  0
+DiscrByDeltaR  1
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No

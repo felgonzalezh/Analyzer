@@ -1,90 +1,114 @@
 #ifndef Analyzer_h
 #define Analyzer_h
 
-
+struct CRTester;
 
 // system include files
 #include <memory>
 
 // user include files
-#include <Math/VectorUtil.h>
 #include <fstream>
-#include <TH1.h>
-#include <TH2.h>
-#include <TFile.h>
-#include <TTree.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <map>
-#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <TRandom3.h>
-#include <TMath.h>
 #include <iostream>
-#include <iomanip>
-#include <utility>
-#include <TROOT.h>
-#include <TBranch.h>
-#include <TApplication.h>
-#include <TChain.h>
-#include <TDirectory.h>
-#include <TLorentzVector.h>
-#include <TEnv.h>
-#include "Particle.h"
-#include "Histo.h"
-#include "./svfit/SVfitStandaloneAlgorithm.h"
+#include <chrono>
 
-//#include <ctime>
+#include <TDirectory.h>
+#include <TEnv.h>
+#include <TLorentzVector.h>
+#include <TChain.h>
+#include <TTree.h>
+#include <TH1.h>
+
+#include "Particle.h"
+#include "MET.h"
+#include "Histo.h"
+
+/////fix
+#include "./btagging/BTagCalibrationStandalone.h"
+
+#include "Cut_enum.h"
+#include "FillInfo.h"
+#include "CRTest.h"
+#include "Systematics.h"
+#include "JetScaleResolution.h"
+
+
+double normPhi(double phi);
+double absnormPhi(double phi);
 
 //#define const
 using namespace std;
 
-class Analyzer {
+static const int nTrigReq = 2;
 
- public:
-  Analyzer(string, string);
+class Analyzer {
+  friend class CRTester;
+public:
+  Analyzer(vector<string>, string, bool setCR = false, string configFolder="PartDet");
   ~Analyzer();
   void clear_values();
   void preprocess(int);
-  void fillCuts();
+  bool fillCuts(bool);
   void printCuts();
   void writeout();
   int nentries;
   void fill_histogram();
+  void setControlRegions() { histo.setControlRegions();}
 
- private:
-  void fill_Folder(string, int);
+  vector<int>* getList(CUTS ePos) {return goodParts[ePos];}
+  double getMet() {return _MET->pt();}
+  double getHT() {return _MET->HT();}
+  double getMHT() {return _MET->MHT();}
+  double getMass(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2, string partName) {
+    return diParticleMass(Tobj1, Tobj2, distats[partName].smap.at("HowCalculateMassReco"));
+  }
+  double getZeta(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2, string partName) {
+    return distats[partName].dmap.at("PZetaCutCoefficient") * getPZeta(Tobj1, Tobj2).first;
+  }
+
+
+private:
+  void CRfillCuts();
+  ///// Functions /////
+  //void fill_Folder(string, const int, string syst="");
+  void fill_Folder(string, const int, Histogramer& ihisto, int syst=-1 );
 
   void getInputs();
   void setupJob(string);
-  void initializePileupInfo(string, string);  
+  void initializePileupInfo(string, string, string, string);
   void read_info(string);
-  void setupGeneral(TTree*, string);
+  void setupGeneral();
+  void initializeTrigger();
+  void setCutNeeds();
 
-  void smearLepton(Lepton&, CUTS, const PartStats&);
-  void smearJet(const PartStats&);
+  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
+  void smearJet(Particle&, CUTS, const PartStats&, string syst="orig");
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
+  TLorentzVector matchJetToGen(const TLorentzVector&, const PartStats&, CUTS);
 
-  void getGoodTauNu();  
-  void getGoodGen(int, int, CUTS, const PartStats&);
-  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
-  void getGoodRecoJets(CUTS, const PartStats&);
+  int matchToGenPdg(const TLorentzVector& lvec, double minDR);
 
-  void getGoodMetTopologyLepton(const Lepton&, CUTS,CUTS, const PartStats&);
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
-  void getGoodDiJets(const PartStats&);
 
-  void VBFTopologyCut();
-  bool passTriggerCuts(string);
-  int find_trigger(vector<string>&, string);
+  void getGoodParticles(int);
+  void getGoodTauNu();
+  void getGoodGen(const PartStats&);
+  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const string&);
+  void getGoodRecoJets(CUTS, const PartStats&, const string&);
+  void getGoodRecoFatJets(CUTS, const PartStats&, const string&);
 
-  void SVFit(const Lepton&, const Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType, string, int, double);
-  pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> getTypePair(CUTS ePos);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const string&);
+  void getGoodDiJets(const PartStats&, const string&);
+
+  void VBFTopologyCut(const PartStats&, const string&);
+  void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
+
 
   double calculateLeptonMetMt(const TLorentzVector&);
   double diParticleMass(const TLorentzVector&, const TLorentzVector&, string);
@@ -95,72 +119,100 @@ class Analyzer {
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
+  bool select_mc_background();
+  double getTauDataMCScaleFactor(int updown);
 
-  double getPZeta(const TLorentzVector&, const TLorentzVector&);
-  double getPZetaVis(const TLorentzVector&, const TLorentzVector&);
-  double normPhi(double);
-  double absnormPhi(double);
 
-  void updateMet();
+  pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
+  void create_fillInfo();
+
+  double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
+
+
+  inline bool passCutRange(string, double, const PartStats&);
+
+  void updateMet(string syst="orig");
+  void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);
+  unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
-  TFile* f;
-  TTree* BOOM;
-  TH1F *hPUmc;
-  TH1F *hPUdata;
+  double getCRVal(string);
+  void setupCR(string, double);
+
+  ///// values /////
+
+  TChain* BOOM;
+  TTree* BAAM;
+  TFile* infoFile;
+  string filespace = "";
+  double hPU[100];
+  int version=0;
 
   Generated* _Gen;
   Electron* _Electron;
   Muon* _Muon;
   Taus* _Tau;
   Jet* _Jet;
+  FatJet* _FatJet;
+  Met* _MET;
   Histogramer histo;
+  Histogramer syst_histo;
+  Systematics systematics;
+  JetScaleResolution jetScaleRes;
+  PartStats genStat;
 
   unordered_map<string, PartStats> distats;
-  unordered_map<string, pair<int,int> > prevTrig;
-  PartStats genStat;
+  unordered_map<string, FillVals*> fillInfo;
   unordered_map<string, double> genMap;
-  std::array<std::vector<int>, static_cast<int>(CUTS::enumSize)> goodParts;
+  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
+  unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
+  vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
+  unordered_map<CUTS, bool, EnumHash> need_cut;
   
+  unordered_map<string,bool> gen_selection;
+  bool isVSample;
+
+  vector<Particle*> allParticles;
+  vector<string> syst_names;
+
+  static const unordered_map<string, CUTS> cut_num;
+  static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
+
+  vector<int>* trigPlace[nTrigReq];
+  bool setTrigger = false;
+  vector<string>* trigName[nTrigReq];
   vector<int> cuts_per, cuts_cumul;
 
-  TLorentzVector theMETVector;
-  double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
-  double againstElectron, againstMuon, maxIso, minIso;
-  int leadIndex, maxCut;
-  bool isData, CalculatePUSystematics;
+  double maxIso, minIso;
+  int leadIndex, maxCut, crbins=1;
+  bool isData, CalculatePUSystematics, doSystematics;
 
-  vector<double>* Trigger_decision = 0;
+  vector<int>* Trigger_decision = 0;
+  vector<int>* Trigger_decisionV1 = 0;
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;
-  double Met_px = 0;
-  double Met_py = 0;
-  double Met_pz = 0;
-  TMatrixD MetCov;
+  double gen_weight = 0;
 
-  double pu_weight, wgt;
+  BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
+  BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");
 
-  unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };
-  
-  std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
-    {"NGenMuon", CUTS::eGMuon}, {"NGenZ", CUTS::eGZ}, {"NGenW", CUTS::eGW}, {"NGenHiggs", CUTS::eGHiggs}, \
-    {"NRecoVertex", CUTS::eRVertex}, {"NRecoMuon1", CUTS::eRMuon1}, {"NRecoMuon2", CUTS::eRMuon2}, \
-    {"NRecoElectron1", CUTS::eRElec1}, {"NRecoElectron2",CUTS::eRElec2}, {"NRecoTau1", CUTS::eRTau1},  \
-    {"NRecoTau2", CUTS::eRTau2}, {"NRecoJet1", CUTS::eRJet1}, {"NRecoJet2", CUTS::eRJet2}, \
-    {"NRecoCentralJet", CUTS::eRCenJet}, {"NRecoBJet", CUTS::eRBJet}, {"NRecoTriggers1", CUTS::eRTrig1}, 
-    {"NRecoTriggers2", CUTS::eRTrig2}, {"NRecoFirstLeadingJet", CUTS::eR1stJet}, {"NRecoSecondLeadingJet", CUTS::eR2ndJet},
-    {"NRecoMuon1MetTopology", CUTS::eTMuon1}, {"NRecoMuon2MetTopology", CUTS::eTMuon2}, 
-    {"NRecoElectron1MetTopology", CUTS::eTElec1}, {"NRecoElectron2MetTopology", CUTS::eTElec2}, 
-    {"NRecoTau1MetTopology", CUTS::eTTau1}, {"NRecoTau2MetTopology", CUTS::eTTau2}, {"NDiMuonCombinations", CUTS::eDiMuon},
-    {"NDiElectronCombinations", CUTS::eDiElec}, {"NDiTauCombinations", CUTS::eDiTau}, {"NDiJetCombinations", CUTS::eDiJet},
-    {"NMuon1Tau1Combinations", CUTS::eMuon1Tau1}, {"NMuon1Tau2Combinations", CUTS::eMuon1Tau2}, 
-    {"NMuon2Tau1Combinations", CUTS::eMuon2Tau1}, {"NMuon2Tau2Combinations", CUTS::eMuon2Tau2},
-    {"NElectron1Tau1Combinations", CUTS::eElec1Tau1}, {"NElectron1Tau2Combinations", CUTS::eElec1Tau2},
-    {"NElectron2Tau1Combinations", CUTS::eElec2Tau1}, {"NElectron2Tau2Combinations", CUTS::eElec2Tau2},
-    {"NSusyCombinations", CUTS::eSusyCom}, {"METCut", CUTS::eMET} };
+  double rho =20.;
 
+  const static vector<CUTS> genCuts;
+  const static vector<CUTS> jetCuts;
+  double pu_weight, wgt, backup_wgt;
+  unordered_map<int, GenFill*> genMaper;
+
+  vector<CRTester*> testVec;
+  int SignalRegion = -1;
+  bool blinded = true;
+  clock_t start_time;
+  std::chrono::time_point<std::chrono::system_clock> start;
 
 };
 
+
+
 #endif
+

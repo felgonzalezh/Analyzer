@@ -1,0 +1,67 @@
+####################################
+          Systematics
+####################################
+
+useSystematics 1
+
+Met_Uncl_Up           0
+Met_Uncl_Down         0
+Jet_Res_Up           1
+Jet_Res_Down         1
+Jet_Scale_Up         1
+Jet_Scale_Down       1
+Electron_Res_Up      1
+Electron_Res_Down    1
+Electron_Scale_Up    1
+Electron_Scale_Down  1
+Muon_Res_Up          1
+Muon_Res_Down        1
+Muon_Scale_Up        1
+Muon_Scale_Down      1
+
+
+################################
+        Muon_systematics
+################################
+#minimal pt and maximal eta
+
+pt_min  30
+eta_max 2.8
+scale 0.05
+res  0.032
+
+
+################################
+        Electron_systematics
+################################
+#minimal pt and maximal eta
+
+pt_min  30
+eta_max 2.8
+#Based on 2015 JINST 10 P06005
+scale 0.003
+res  0.0
+
+
+################################
+        Tau_systematics
+################################
+#minimal pt and maximal eta
+
+pt_min  30
+eta_max 2.4
+scale 0.03
+res  0.0
+
+################################
+        Jet_systematics
+################################
+#minimal pt and maximal eta
+
+pt_min  30
+eta_max 2.8
+scale 0.05
+res  0.032
+#from https://github.com/cms-jet/JRDatabase
+jetResolutionFileUnmatched Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt
+jetResolutionSFFile Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt
