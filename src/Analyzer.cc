@@ -1548,7 +1548,6 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 	if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
 	else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
       }
-
       ///Particlesp that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
       /// final % nGen = part2
@@ -1722,6 +1721,7 @@ void Analyzer::fill_histogram() {
     if(distats["Run"].bfind("ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
     //  cout << " Gen_weight  " << ((gen_weight > 0) ? 1.0 : -1.0) << " weight " << wgt <<endl;
     //add weight here
+
     if(distats["Run"].bfind("ApplyTauIDSF")){
       wgt *= getTauDataMCScaleFactor(0);
       //cout<< " TauID SF "<< getTauDataMCScaleFactor(0) << " weight "<< wgt <<endl;
