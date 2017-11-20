@@ -200,8 +200,10 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   // check if we need to make gen level cuts to cross clean the samples:
 
   isVSample = false;
+  //  cout << "--?--" << endl;
   if(infiles[0].find("DY") != string::npos){
     isVSample = true;
+    //    cout << "check file name" << endl;
     if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
       gen_selection["DY_noMass_gt_200"]=true;
     //get the DY1Jet DY2Jet ...
@@ -211,7 +213,11 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
       //set it to false!!
       gen_selection["DY_noMass_gt_200"]=false;
     }
+    //DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8
+
     if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
+      //if(infiles[0].find("DYJetsToLL_M-50") != string::npos){
+      //cout << "PASS name selection" << endl;
       gen_selection["DY_noMass_gt_200"]=true;
     }else{
       //set it to false!!
@@ -582,6 +588,7 @@ void Analyzer::printCuts() {
 
 bool Analyzer::select_mc_background(){
   //will return true if Z* mass is smaller than 200GeV
+  //  cout << "SELECTED bkg" << endl;
   if(gen_selection["DY_noMass_gt_200"]){
     TLorentzVector lep1;
     TLorentzVector lep2;
@@ -641,6 +648,7 @@ double Analyzer::getTauDataMCScaleFactor(int updown){
       */
     }
   }
+  //  cout << "TauID SF" << sf << endl;
   return sf;
 }
 
@@ -745,8 +753,8 @@ void Analyzer::setupGeneral() {
   genMaper = {
     {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
     {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
-    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
-    {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
+    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(62, CUTS::eGZ)},
+    {24, new GenFill(62, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
 };
 
   SetBranch("nTruePUInteractions", nTruePU);
@@ -928,11 +936,16 @@ void Analyzer::setCutNeeds() {
  
   }
   
-  if(!isData){
+  if(!isData and distats["Run"].bfind("ApplyZBoostSF") and isVSample){
     neededCuts.loadCuts(CUTS::eGen);
     neededCuts.loadCuts(CUTS::eGZ);
     neededCuts.loadCuts(CUTS::eGW);
   }
+  /*
+  if(!isData and distats["Run"].bfind("ApplyTriggerSF")){
+    neededCuts.loadCuts(CUTS::eRTau1);
+  }
+  */
 
   cout << "Cuts being filled: " << endl;
   for(auto cut : neededCuts.getCuts()) {
@@ -964,6 +977,8 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, co
     }
   }
 }
+
+
 
 ///Same as smearlepton, just jet specific
 void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stats, int syst) {
@@ -1102,6 +1117,13 @@ void Analyzer::getGoodGen(const PartStats& stats) {
     if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(5)->status) {
       active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
+    /*
+    //    if(id == 23 && (_Gen->status->at(j) == 44 || _Gen->status->at(j) == 44)){
+    if(id == 23 && _Gen->status->at(j) == 62){
+      active_part->at(genMaper.at(23)->ePos)->push_back(j);
+    }
+    */
+
   }
 
 }
@@ -1179,7 +1201,8 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
         else if (cut == "SelectTausThatAreMuons") passCuts = passCuts &&  !_Tau->pass_against_Muon(ePos, i);
 
         else if(cut == "DiscrByProngType") {
-          passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
+	  passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
+	  //passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFinding->at(i) != 0);
           passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
         }
               // ----anti-overlap requirements
@@ -1468,6 +1491,7 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats, const int syst) {
   if(! neededCuts.isPresent(ePosFin)) return;
   string systname = syst_names.at(syst);
+
   if(!lep1.needSyst(syst) && !lep2.needSyst(syst)) {
     active_part->at(ePosFin)=goodParts[ePosFin];
     return;
@@ -1481,7 +1505,6 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
     for(auto i2 : *active_part->at(ePos2)) {
       if(sameParticle && i2 <= i1) continue;
       part2 = lep2.p4(i2);
-
       bool passCuts = true;
       for(auto cut : stats.bset) {
         if(!passCuts) break;
@@ -1501,31 +1524,35 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
           double diMass = diParticleMass(part1,part2, stats.smap.at("HowCalculateMassReco"));
           passCuts = passCuts && passCutRange(diMass, stats.pmap.at("MassCut"));
         }
+
         else if(cut == "DiscrByCosDphiPtAndMet"){       
 	  double CosDPhi1 = cos(absnormPhi(part1.Phi() - _MET->phi()));       
           passCuts = passCuts && passCutRange(CosDPhi1, stats.pmap.at("CosDphiPtAndMetCut"));
         }
 
+        else if(cut == "DiscrByCosDphiPt2AndMet"){       
+	  double CosDPhi2 = cos(absnormPhi(part2.Phi() - _MET->phi()));       
+          passCuts = passCuts && passCutRange(CosDPhi2, stats.pmap.at("CosDphiPt2AndMetCut"));
+        }
+
 
         else cout << "cut: " << cut << " not listed" << endl;
       }
-      
 
-      // if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
-      //   //if it is 1 or 0 it will end up in the bool map!!
-      //   if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      // }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
-      //   if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
-      // }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
-      //   if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      //   else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
-      // }
-
+      if (stats.bfind("DiscrByOSLSType")){
+	//   if it is 1 or 0 it will end up in the bool map!!
+	if(stats.bfind("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+      }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
+	if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
+      }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
+	if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+	else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
+      }
 
       ///Particlesp that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
       /// final % nGen = part2
-      active_part->at(ePosFin)->push_back(i1*BIG_NUM + i2);
+      if(passCuts) active_part->at(ePosFin)->push_back(i1*BIG_NUM + i2);
     }
   }
 }
@@ -1613,9 +1640,70 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
   return make_pair(px*zetaX + py*zetaY, visPx*zetaX + visPy*zetaY);
 }
 
-double Analyzer::getZBoostWeight(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2){  //new7.28.17
-  return (Tobj1 + Tobj2).Pt();  //new7.28.17
-}  //new7.28.17
+
+
+double Analyzer::getZBoostWeight(){
+  double boostweigth=1.;
+
+  if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
+    
+    //    cout<<" HAY UN PAR DE LEPTONES O UN Z O UN W " << endl;
+
+    double boostz = 0;
+    if(active_part->at(CUTS::eGZ)->size() ==1){
+      boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
+      //      cout<<" GenZ pt " << _Gen->pt(active_part->at(CUTS::eGZ)->at(0)) <<  _Gen->pt(active_part->at(CUTS::eGZ)->at(0)) <<endl;
+    }
+    if(active_part->at(CUTS::eGW)->size() ==1){
+      boostz = _Gen->pt(active_part->at(CUTS::eGW)->at(0));
+      //      cout<<" GenW pt " << _Gen->pt(active_part->at(CUTS::eGZ)->at(0)) << _Gen->pt(active_part->at(CUTS::eGW)->at(0)) <<endl;
+    }
+    if(boostz > 0 && boostz <= 50) {boostweigth = 1.1192;}
+    else if (boostz > 50 && boostz <= 100) {boostweigth = 1.1034;}
+    else if (boostz > 100 && boostz <= 150) {boostweigth = 1.0675;}
+    else if (boostz > 150 && boostz <= 200) {boostweigth = 1.0637;}
+    else if (boostz > 200 && boostz <= 300) {boostweigth = 1.0242;}
+    else if (boostz > 300 && boostz <= 400) {boostweigth = 0.9453;}
+    else if (boostz > 400 && boostz <= 600) {boostweigth = 0.8579;}
+    else if (boostz >= 600) {boostweigth = 0.7822;}
+    else {boostweigth = 1;}
+
+    
+  }
+  //  cout << "GenZBoosted weight" << boostweigth << endl;
+  return boostweigth;
+}
+
+double Analyzer::triggerSF() {
+  double TriggerSF = 1;
+
+  //  if(distats["Run"].bfind("ApplyTriggerSF")){
+  int q = 0;
+  if(goodParts[CUTS::eDiTau]->size() != 1){
+    q+=0;
+  }else{
+    double taupt1 = 0;
+    int i = 0;
+    int decaymode = 0;
+    //    cout << "size" << active_part->at(CUTS::eRTau1)->size() << endl;
+    for(vec_iter it=active_part->at(CUTS::eRTau1)->begin(); it!=active_part->at(CUTS::eRTau1)->end(); it++, i++) {
+      taupt1 = _Tau->p4(*it).Pt();
+      decaymode = _Tau->decayMode->at(*it);
+      //      cout << "-----DECAYMODE " << decaymode << endl;
+
+
+      //----------------------OUR WEIGHT------------------------------
+      TriggerSF = (-0.0007214+(0.9491*TMath::Freq((TMath::Sqrt(taupt1)-TMath::Sqrt(41.99))/(2*0.4216))))*TriggerSF;
+      //------------------TAU POG WEIGHT- -----------------------------
+      //      TriggerSF = triggerSF_TAUPOG(taupt1, decaymode)*TriggerSF;
+      //      cout << "Tau pt " << taupt1 << " SF " << TriggerSF << endl;
+
+    }
+  }
+  //  cout << "TRIGGERSF " << TriggerSF << endl;
+  return TriggerSF;
+}
+
 
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
@@ -1627,40 +1715,38 @@ void Analyzer::fill_histogram() {
   const vector<string>* groups = histo.get_groups();
   if(!isData){
     wgt = 1.;
+    //    cout << "INITIAL " << wgt << endl;
     if(distats["Run"].bfind("UsePileUpWeight")) wgt*= pu_weight;
-    //    cout << "PU_weight " << wgt << endl;
+    //    cout <<  "PU weight "<< pu_weight << " weight " << wgt << endl;
 
     if(distats["Run"].bfind("ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
-    //    cout<<"Gen_weight  "<< wgt <<endl;
+    //  cout << " Gen_weight  " << ((gen_weight > 0) ? 1.0 : -1.0) << " weight " << wgt <<endl;
     //add weight here
-    if(distats["Run"].bfind("ApplyTauIDSF")) wgt *= getTauDataMCScaleFactor(0);
-    cout<<"weight normal "<< wgt/backup_wgt <<endl;
-
-    //    if(isVSample && distats["Run"].bfind("ApplyZBoostSF")){
-    if(distats["Run"].bfind("ApplyZBoostSF")){
-      //if(active_part->at(CUTS::eGZ)->size()==0) cout<<" No Z " <<endl;
-      if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
-	//cout<<" Z or W " <<endl;
-	double boostz = 0;
-	if(active_part->at(CUTS::eGZ)->size() ==1){
-	  boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
-	}
-	if(active_part->at(CUTS::eGW)->size() ==1){
-	  boostz = _Gen->pt(active_part->at(CUTS::eGW)->at(0));
-	}
-	if(boostz > 0 && boostz <= 50) {wgt *= 1.1192;}
-	else if (boostz > 50 && boostz <= 100) {wgt *= 1.1034;}
-	else if (boostz > 100 && boostz <= 150) {wgt *= 1.0675;}
-	else if (boostz > 150 && boostz <= 200) {wgt *= 1.0637;}
-	else if (boostz > 200 && boostz <= 300) {wgt *= 1.0242;}
-	else if (boostz > 300 && boostz <= 400) {wgt *= 0.9453;}
-	else if (boostz > 400 && boostz <= 600) {wgt *= 0.8579;}
-	else if (boostz >= 600) {wgt *= 0.7822;}
-	else {wgt *= 1;}
+    if(distats["Run"].bfind("ApplyTauIDSF")){
+      wgt *= getTauDataMCScaleFactor(0);
+      //cout<< " TauID SF "<< getTauDataMCScaleFactor(0) << " weight "<< wgt <<endl;
+      //      cout << " EVENT SF " << wgt << endl;
+      wgt *= triggerSF();
+    }
+    
+    if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
+      /*      int q=0;
+      if(goodParts[CUTS::eDiTau]->size() != 1){
+	q+=0;
       }
+      else{*/
+      wgt *= getZBoostWeight();
+      //cout << "ZBoost weight " << getZBoostWeight() << " weight" << wgt << endl;
+      //cout << "Trigger weight "<< triggerSF() << " weight " << wgt << endl;
     }
 
-    backup_wgt=wgt;
+    /*
+    if(distats["Run"].bfind("ApplyTriggerSF")){
+      cout << " Applied " << wgt << endl;
+    }
+    */                                 
+
+    //    cout << " FINAL " << wgt << endl;
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
@@ -1677,6 +1763,20 @@ void Analyzer::fill_histogram() {
         fill_Folder(it, maxCut, histo, false);
       }
     }else{
+      if(syst_names[i].find("weight")!=string::npos){
+	if(syst_names[i]=="Tau_weight_Up"){
+	  if(distats["Run"].bfind("ApplyTauIDSF")) {
+	    wgt/=getTauDataMCScaleFactor(0);
+	    wgt *= getTauDataMCScaleFactor(1);
+	  }
+	}else if(syst_names[i]=="Tau_weight_Down"){
+	  if(distats["Run"].bfind("ApplyTauIDSF")) {
+	    wgt/=getTauDataMCScaleFactor(0);
+	    wgt *= getTauDataMCScaleFactor(-1);
+	  }
+	}
+      }
+      
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
         active_part->at(itCut)=goodParts.at(itCut);
@@ -1686,6 +1786,7 @@ void Analyzer::fill_histogram() {
       for(auto it: *syst_histo.get_groups()) {
         fill_Folder(it, i, syst_histo, true);
       }
+      wgt=backup_wgt;
     }
   }
 }
@@ -1821,30 +1922,44 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       }
       sort(ptIndexVector.begin(),ptIndexVector.end());
       if(ptIndexVector.size()>0){
+	histAddVal(part->p4(ptIndexVector.back().second).Energy(), "FirstLeadingEnergy");
         histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt");
         histAddVal(part->eta(ptIndexVector.back().second), "FirstLeadingEta");
-      }
+	histAddVal(part->phi(ptIndexVector.back().second), "FirstLeadingPhi");
+	if(part->type == PType::Tau ){
+	  histAddVal(_Tau->nProngs->at(ptIndexVector.back().second), "FirstLeadingNumSignalTracks");
+	  if(_Tau->nProngs->at(ptIndexVector.back().second) == 1){
+	    histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt_1prong");
+	  }else if(_Tau->nProngs->at(ptIndexVector.back().second) == 3){
+	    histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt_3prong");
+	  }
+	  histAddVal(_Tau->charge(ptIndexVector.back().second), "FirstLeadingCharge");
+	  histAddVal(_Tau->leadChargedCandPt->at(ptIndexVector.back().second), "FirstLeadingSeedTrackPt");
+	  histAddVal(calculateLeptonMetMt(part->p4(ptIndexVector.back().second)), "FirstLeadingMetMt");
+	}
+	histAddVal((part->phi(ptIndexVector.back().second)-(_MET->phi())), "DPhiFirstLeadingMet");
+	histAddVal(cos(abs(part->phi(ptIndexVector.back().second)-(_MET->phi()))), "CosDPhiFirstLeadingMet");
+    }
       if(ptIndexVector.size()>1){
+	histAddVal(part->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Energy(), "SecondLeadingEnergy");
         histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt");
         histAddVal(part->eta(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingEta");
+	histAddVal(part->phi(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPhi");
+	if(part->type == PType::Tau ){
+	  histAddVal(_Tau->nProngs->at(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingNumSignalTracks");
+	  if(_Tau->nProngs->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 1){
+	    histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt_1prong");
+	  }else if(_Tau->nProngs->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 3){
+	    histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt_3prong");
+	  }
+	  histAddVal(_Tau->charge(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingCharge");
+	  histAddVal(_Tau->leadChargedCandPt->at(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingSeedTrackPt");
+	  histAddVal(calculateLeptonMetMt(part->p4(ptIndexVector.at(ptIndexVector.size()-2).second)), "SecondLeadingMetMt");
+	}
+	histAddVal((part->phi(ptIndexVector.at(ptIndexVector.size()-2).second)-(_MET->phi())), "DPhiSecondLeadingMet");
+	histAddVal(cos(abs(part->phi(ptIndexVector.at(ptIndexVector.size()-2).second)-(_MET->phi()))), "CosDPhiSecondLeadingMet");
       }
     }
-
-    /*
-    if((part->type != PType::Jet ) && active_part->at(ePos)->size() > 0) {
-      double leadpt = 0;
-      double leadeta = 0;
-      for(auto it : *active_part->at(ePos)) {
-        if(part->p4(it).Pt() >= leadpt) {
-          leadpt = part->p4(it).Pt();
-          leadeta = part->p4(it).Eta();
-        }
-      }
-
-      histAddVal(leadpt, "FirstLeadingPt");
-      histAddVal(leadeta, "FirstLeadingEta");
-    }
-*/
 
     histAddVal(active_part->at(ePos)->size(), "N");
 
@@ -2076,3 +2191,84 @@ double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
 
+double Analyzer::triggerSF_TAUPOG(double pt, int dm) {
+
+  double m0 ;
+  double sigma ;
+  double alpha ;
+  double n ;
+  double norm ;
+
+
+  if(dm == 0){
+    m0 = 38.083905839292164;
+    sigma = 6.202388502948717;
+    alpha = 4.862445750387961;
+    n = 3.397804647368993;
+    norm = 0.9321292524169671;
+  }else if(dm == 1){
+    m0 = 36.33798366748843;
+    sigma = 4.5521495089687765;
+    alpha = 4.661955903316635;
+    n = 1.6079296195874044;
+    norm = 0.9999999970681116;
+  }else if(dm == 10){
+    m0 = 38.083905839292164;
+    sigma = 6.202388502948717;
+    alpha = 4.862445750387961;
+    n = 3.397804647368993;
+    norm =  0.9321292524169671;
+  }else{
+    return 1;
+  }
+
+  //  double pt = 1;
+  
+  double sqrtPiOver2 = sqrt(M_PI / 2);
+  double sqrt2 = sqrt(2);
+  double sig = abs(sigma);
+  double t = ((pt - m0)/sig )*( alpha / abs(alpha));
+  double absAlpha    = abs(alpha/sig);
+  double a = pow(n/absAlpha,n)* exp(-0.5*absAlpha*absAlpha);
+  double b = (absAlpha - n)/absAlpha;
+  double arg = absAlpha/sqrt2;
+  /*
+  cout << "sqrtPiOver2 " << sqrtPiOver2 << " sqrt2 " << sqrt2 << " sig " << sig << " t " << t << " absAlpha " << absAlpha << " a " << a << " b " << b << " arg " << arg << endl;
+  */
+  double ApproxErf = 0;
+ 
+  if(arg >  5.0){
+    ApproxErf =  1.0;
+  }else if(arg <  -5.0){
+    ApproxErf =  -1.0;
+  }else{
+    ApproxErf = TMath::Erf(arg);
+  }
+
+  
+  double leftArea  = (1.0 + ApproxErf)*sqrtPiOver2;
+  double rightArea = ( a*1.0/pow(absAlpha-b, n-1)) / (n - 1);
+  double area      = leftArea + rightArea;
+
+  double weight = 0;
+
+  if (t <= absAlpha){
+    arg = t / sqrt2;
+    if(arg >  5.0){
+      ApproxErf =  1.0;
+    }else if(arg <  -5.0){
+      ApproxErf =  -1.0;
+    }else{
+      ApproxErf = TMath::Erf(arg);
+    } 
+    //weight = norm;
+    weight = norm*(1.0 + ApproxErf)*sqrtPiOver2 / area; 
+    //    cout << " WEIGHT1 " << weight << endl;
+  }else{
+    weight = (norm*(leftArea + a*((1/pow(t-b,n-1)) -(1/pow(absAlpha - b,n-1))) / (1 - n)) / area);  
+    //    cout << " WEIGHT2 " << weight << endl;
+  }  
+
+  //  cout << "PESO POR TAU " << weight  << endl;
+  return weight;
+}

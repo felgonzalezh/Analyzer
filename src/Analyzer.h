@@ -126,9 +126,11 @@ private:
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
-  double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
+  double getZBoostWeight();
+  double triggerSF();
+  double triggerSF_TAUPOG(double pt, int dm);
 
-
+  //  void smearLepton(Lepton&, CUTS, const PartStats&);
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
   bool findCut(const vector<string>&, string);

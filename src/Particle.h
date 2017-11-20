@@ -244,6 +244,7 @@ public:
   bool pass_against_Muon(CUTS, int);
 
   vector<int>     *decayModeFindingNewDMs = 0;
+  //vector<int>     *decayModeFinding = 0;
   vector<double>  *nProngs = 0;
   vector<int>  *decayMode = 0;
   pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
@@ -252,7 +253,8 @@ public:
   pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
   vector<double>  *leadChargedCandPt = 0;
   vector<double>  *leadChargedCandPtError = 0;
-  vector<int>  *leadChargedCandValidHits = 0;
+  //  vector<int>  *leadChargedCandValidHits = 0;
+  vector<double>  *leadChargedCandValidHits = 0;
 };
 
 
