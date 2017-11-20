@@ -1675,7 +1675,6 @@ double Analyzer::getZBoostWeight(){
 
 double Analyzer::triggerSF() {
   double TriggerSF = 1;
-
   //  if(distats["Run"].bfind("ApplyTriggerSF")){
   int q = 0;
   if(goodParts[CUTS::eDiTau]->size() != 1){
@@ -1688,13 +1687,10 @@ double Analyzer::triggerSF() {
     for(vec_iter it=active_part->at(CUTS::eRTau1)->begin(); it!=active_part->at(CUTS::eRTau1)->end(); it++, i++) {
       taupt1 = _Tau->p4(*it).Pt();
       decaymode = _Tau->decayMode->at(*it);
-      //      cout << "-----DECAYMODE " << decaymode << endl;
-
-
       //----------------------OUR WEIGHT------------------------------
-      TriggerSF = (-0.0007214+(0.9491*TMath::Freq((TMath::Sqrt(taupt1)-TMath::Sqrt(41.99))/(2*0.4216))))*TriggerSF;
+      //      TriggerSF = (-0.0007214+(0.9491*TMath::Freq((TMath::Sqrt(taupt1)-TMath::Sqrt(41.99))/(2*0.4216))))*TriggerSF;
       //------------------TAU POG WEIGHT- -----------------------------
-      //      TriggerSF = triggerSF_TAUPOG(taupt1, decaymode)*TriggerSF;
+      TriggerSF = triggerSF_TAUPOG(taupt1, decaymode)*TriggerSF;
       //      cout << "Tau pt " << taupt1 << " SF " << TriggerSF << endl;
 
     }
@@ -2221,9 +2217,6 @@ double Analyzer::triggerSF_TAUPOG(double pt, int dm) {
   }else{
     return 1;
   }
-
-  //  double pt = 1;
-  
   double sqrtPiOver2 = sqrt(M_PI / 2);
   double sqrt2 = sqrt(2);
   double sig = abs(sigma);
@@ -2232,9 +2225,6 @@ double Analyzer::triggerSF_TAUPOG(double pt, int dm) {
   double a = pow(n/absAlpha,n)* exp(-0.5*absAlpha*absAlpha);
   double b = (absAlpha - n)/absAlpha;
   double arg = absAlpha/sqrt2;
-  /*
-  cout << "sqrtPiOver2 " << sqrtPiOver2 << " sqrt2 " << sqrt2 << " sig " << sig << " t " << t << " absAlpha " << absAlpha << " a " << a << " b " << b << " arg " << arg << endl;
-  */
   double ApproxErf = 0;
  
   if(arg >  5.0){
