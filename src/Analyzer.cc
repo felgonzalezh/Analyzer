@@ -1202,8 +1202,9 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
 
         else if(cut == "DiscrByProngType") {
 	  passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
-	  //passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFinding->at(i) != 0);
-          passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
+	  //	  passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFinding->at(i) != 0);
+	  //          passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
+	  passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->decayMode->at(i));
         }
               // ----anti-overlap requirements
         else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
@@ -1336,9 +1337,13 @@ bool Analyzer::isOverlaping(const TLorentzVector& lvec, Lepton& overlapper, CUTS
 
 ///Tests if tau decays into the specified number of jet prongs.
 bool Analyzer::passProng(string prong, int value) {
+  return ( (prong.find("1") != string::npos &&  (value<5)) ||
+	   (prong.find("2") != string::npos &&  (value>=5 && value<10)) ||
+	   (prong.find("3") != string::npos && (value>=10 && value<12)) );
+  /*
   return ( (prong.find("1") != string::npos && value == 1) ||
   (prong.find("2") != string::npos && value == 2) ||
-  (prong.find("3") != string::npos && value == 3) );
+  (prong.find("3") != string::npos && value == 3) );*/
 }
 
 
@@ -1677,6 +1682,7 @@ double Analyzer::triggerSF() {
   double TriggerSF = 1;
   //  if(distats["Run"].bfind("ApplyTriggerSF")){
   int q = 0;
+  string group ="Tau1";
   if(goodParts[CUTS::eDiTau]->size() != 1){
     q+=0;
   }else{
@@ -1889,18 +1895,21 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       histAddVal(part->p4(it).Eta(), "Eta");
       histAddVal(part->p4(it).Phi(), "Phi");
       histAddVal(part->p4(it).DeltaPhi(_MET->p4()), "MetDphi");
-      if(part->type == PType::Tau) {
-        if(_Tau->nProngs->at(it) == 1){
-          histAddVal(part->pt(it), "Pt_1prong");
-        }else if(_Tau->nProngs->at(it) == 3){
-          histAddVal(part->pt(it), "Pt_3prong");
-        }
-        histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
-        histAddVal(_Tau->charge(it), "Charge");
-        histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
+      if(part->type == PType::Tau) {    
+	if(_Tau->decayMode->at(it) < 5){
+	  histAddVal(part->pt(it), "Pt_1prong");
+	}else if(_Tau->decayMode->at(it) >= 5 && _Tau->decayMode->at(it) < 10 ){
+	  histAddVal(part->pt(it), "Pt_2prong");
+	}else if(_Tau->decayMode->at(it) >= 10 && _Tau->decayMode->at(it) < 12 ){
+	  histAddVal(part->pt(it), "Pt_3prong");
+	}
+	histAddVal( _Tau->decayMode->at(it), "decaymode");  
+	histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
+	histAddVal(_Tau->charge(it), "Charge");
+	histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
       }
       if(part->type != PType::Jet) {
-        histAddVal(calculateLeptonMetMt(part->p4(it)), "MetMt");
+	histAddVal(calculateLeptonMetMt(part->p4(it)), "MetMt");
       }
       if(part->type == PType::FatJet ) {
         histAddVal(_FatJet->PrunedMass->at(it), "PrunedMass");
@@ -1923,15 +1932,33 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(part->eta(ptIndexVector.back().second), "FirstLeadingEta");
 	histAddVal(part->phi(ptIndexVector.back().second), "FirstLeadingPhi");
 	if(part->type == PType::Tau ){
-	  histAddVal(_Tau->nProngs->at(ptIndexVector.back().second), "FirstLeadingNumSignalTracks");
-	  if(_Tau->nProngs->at(ptIndexVector.back().second) == 1){
+	  if(_Tau->decayMode->at(ptIndexVector.back().second) < 5){
+	    histAddVal(1, "FirstLeadingNumSignalTracks");
 	    histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt_1prong");
-	  }else if(_Tau->nProngs->at(ptIndexVector.back().second) == 3){
+	  }else if(_Tau->decayMode->at(ptIndexVector.back().second) >= 5 && _Tau->decayMode->at(ptIndexVector.back().second) < 10 ){
+	    histAddVal(2, "FirstLeadingNumSignalTracks");
+	    histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt_2prong");
+	  }else if(_Tau->decayMode->at(ptIndexVector.back().second) >= 10 && _Tau->decayMode->at(ptIndexVector.back().second) < 12 ){
+	    histAddVal(3, "FirstLeadingNumSignalTracks");
 	    histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt_3prong");
 	  }
 	  histAddVal(_Tau->charge(ptIndexVector.back().second), "FirstLeadingCharge");
 	  histAddVal(_Tau->leadChargedCandPt->at(ptIndexVector.back().second), "FirstLeadingSeedTrackPt");
 	  histAddVal(calculateLeptonMetMt(part->p4(ptIndexVector.back().second)), "FirstLeadingMetMt");
+
+	  histAddVal( _Tau->decayMode->at(ptIndexVector.back().second), "FirstLeadingdecaymode");  
+	  /*
+	  if(goodParts[CUTS::eDiTau]->size() == 1){
+	    if(_Tau->decayMode->at(ptIndexVector.back().second) == 0){
+	      histAddVal2(_Tau->p4(ptIndexVector.back().second).Pt(), triggerSF_TAUPOG(_Tau->p4(ptIndexVector.back().second).Pt(), _Tau->decayMode->at(ptIndexVector.back().second)), "FirstLeadingWeight_dm0");
+	    }else if(_Tau->decayMode->at(ptIndexVector.back().second) == 1){
+	      histAddVal2(_Tau->p4(ptIndexVector.back().second).Pt(), triggerSF_TAUPOG(_Tau->p4(ptIndexVector.back().second).Pt(), _Tau->decayMode->at(ptIndexVector.back().second)), "FirstLeadingWeight_dm1");
+	    }else if(_Tau->decayMode->at(ptIndexVector.back().second) == 10){
+	      histAddVal2(_Tau->p4(ptIndexVector.back().second).Pt(), triggerSF_TAUPOG(_Tau->p4(ptIndexVector.back().second).Pt(), _Tau->decayMode->at(ptIndexVector.back().second)), "FirstLeadingWeight_dm10");
+	    }
+	  }
+	  */
+
 	}
 	histAddVal((part->phi(ptIndexVector.back().second)-(_MET->phi())), "DPhiFirstLeadingMet");
 	histAddVal(cos(abs(part->phi(ptIndexVector.back().second)-(_MET->phi()))), "CosDPhiFirstLeadingMet");
@@ -1942,15 +1969,32 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(part->eta(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingEta");
 	histAddVal(part->phi(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPhi");
 	if(part->type == PType::Tau ){
-	  histAddVal(_Tau->nProngs->at(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingNumSignalTracks");
-	  if(_Tau->nProngs->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 1){
+	  if(_Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) < 5){
+	    histAddVal(1, "SecondLeadingNumSignalTracks");
 	    histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt_1prong");
-	  }else if(_Tau->nProngs->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 3){
+	  }else if(_Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) >= 5 && _Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) < 10 ){
+	    histAddVal(2, "SecondLeadingNumSignalTracks");
+	    histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt_2prong");
+	  }else if(_Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) >= 10 && _Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) < 12 ){
+	    histAddVal(3, "SecondLeadingNumSignalTracks");
 	    histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt_3prong");
 	  }
 	  histAddVal(_Tau->charge(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingCharge");
 	  histAddVal(_Tau->leadChargedCandPt->at(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingSeedTrackPt");
 	  histAddVal(calculateLeptonMetMt(part->p4(ptIndexVector.at(ptIndexVector.size()-2).second)), "SecondLeadingMetMt");
+	  histAddVal( _Tau->decayMode->at(ptIndexVector.back().second), "SecondLeadingdecaymode");  
+	  /*
+	  if(goodParts[CUTS::eDiTau]->size() == 1){
+	    //	    cout << "diTau" << endl;
+	    if(_Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 0){
+	      histAddVal2(_Tau->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Pt(), triggerSF_TAUPOG(_Tau->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Pt(), _Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second)), "SecondLeadingWeight_dm0");
+	    }else if(_Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 1){
+	      histAddVal2(_Tau->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Pt(), triggerSF_TAUPOG(_Tau->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Pt(), _Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second)), "SecondLeadingWeight_dm1");
+	    }else if(_Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second) == 10){
+	      histAddVal2(_Tau->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Pt(), triggerSF_TAUPOG(_Tau->p4(ptIndexVector.at(ptIndexVector.size()-2).second).Pt(), _Tau->decayMode->at(ptIndexVector.at(ptIndexVector.size()-2).second)), "SecondLeadingWeight_dm10");
+	    }
+	  }
+	  */
 	}
 	histAddVal((part->phi(ptIndexVector.at(ptIndexVector.size()-2).second)-(_MET->phi())), "DPhiSecondLeadingMet");
 	histAddVal(cos(abs(part->phi(ptIndexVector.at(ptIndexVector.size()-2).second)-(_MET->phi()))), "CosDPhiSecondLeadingMet");
@@ -2209,11 +2253,11 @@ double Analyzer::triggerSF_TAUPOG(double pt, int dm) {
     n = 1.6079296195874044;
     norm = 0.9999999970681116;
   }else if(dm == 10){
-    m0 = 38.083905839292164;
-    sigma = 6.202388502948717;
-    alpha = 4.862445750387961;
-    n = 3.397804647368993;
-    norm =  0.9321292524169671;
+    alpha = 1.686527964047553;
+    m0 = 39.82716689014602;
+    sigma = 5.046934778494286;
+    norm = 0.9709884820866538;
+    n = 119.86933951486884;
   }else{
     return 1;
   }
